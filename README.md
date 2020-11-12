@@ -1,1 +1,1 @@
-Game2005-A3-Tulip-Chizhov
+# GAME-2005 Lab 1
