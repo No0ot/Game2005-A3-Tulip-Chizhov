@@ -7,7 +7,7 @@
 #include "Player.h"
 #include "Button.h"
 #include "Enemy.h"
-#include "Grenade.h"
+#include "Bullet.h"
 #include "Tile.h"
 #include <cassert>
 
@@ -39,7 +39,7 @@ public:
 		return m_pEnemy;
 	}
 
-	Grenade* getGrenade() {
+	Bullet* getGrenade() {
 		assert(m_pGrenade != nullptr);
 		return m_pGrenade;
 	}
@@ -54,7 +54,7 @@ private:
 	std::vector<Tile*> m_pGrid;
 	Player* m_pPlayer;
 	Enemy* m_pEnemy;
-	Grenade* m_pGrenade;
+	Bullet* m_pGrenade;
 
 	Label* m_pDistanceLabel;
 	Label* m_pVelocityLabel;
@@ -71,8 +71,6 @@ private:
 	SDL_Rect StartSurface;
 	SDL_Rect SlideSurface;
 
-	void BuildStartSurface();
-	void BuildSlideSurface();
 };
 
 #endif /* defined (__PLAY_SCENE__) */

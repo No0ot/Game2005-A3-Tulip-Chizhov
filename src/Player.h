@@ -7,56 +7,30 @@
 
 class Player final : public Sprite
 {
-private:
-	bool m_sprintFlag;
-	const float WALK_SPEED = 35.0f;
-	const float RUN_SPEED = 50.0f;
-	const float WALK_ACCELERATION = 20.0f;
-	const float RUN_ACCELERATION = 45.0f;
-	glm::vec2 m_targetPosition;
-
 public:
 	Player();
 	~Player();
 
 	// Life Cycle Methods
 	virtual void draw() override;
-	virtual void update(float deltaTime) override;
+	virtual void update(float deltatime) override;
 	virtual void clean() override;
-	
-	//Movement
-	float currentAcceleration();
-	float currentSpeed();
+
 	void moveLeft();
 	void moveRight();
 	void moveUp();
 	void moveDown();
-	void slow();
-	void stop();
+	void stopXMovement();
+	void stopYMovement();
+	void checkCollision(GameObject* pGameObject);
 
-	//temp
 	float checkDistance(GameObject* pGameObject);
 
-	//get/set
-	bool GetSprint() { return m_sprintFlag; }
-	void SetSprint(bool n) { m_sprintFlag = n; }
-	glm::vec2 GetTargetPosition() { return m_targetPosition; }
-	void SetTargetPosition(glm::vec2 n) { m_targetPosition = n; }
 
-	// Ramp variables
-	float rampWidth;
-	float rampHeight;
-	float groundFriction;
-	float rampFriction;
-
-	glm::vec2 Origin;
-	glm::vec2 Rise;
-	glm::vec2 Run;
-
-	void spawn(glm::vec2 position, int width, int height); // accepts width and height in meters
-	void BuildRamp();
-	float GetCurrentHeight(float x); // returns y value given x coordinate
-	float GetCurrentNormal(float x); // returns the surface normal in degrees given x coordinate
+private:
+	const float SPEED = 100.0f;
+	const float ACCELERATION = 10.0f;
+	glm::vec2 m_direction;
 };
 
 #endif /* defined (__PLAYER__) */

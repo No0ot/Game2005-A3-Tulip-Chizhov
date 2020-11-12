@@ -21,18 +21,15 @@ PlayScene::~PlayScene()
 
 void PlayScene::draw()
 {
-	TextureManager::Instance()->draw("background", Config::SCREEN_WIDTH / 2, Config::SCREEN_HEIGHT / 2, Config::SCREEN_WIDTH, Config::SCREEN_HEIGHT, 0, 255, true, SDL_FLIP_NONE);
+	for (auto tile : m_pGrid)
+		tile->draw();
 
 	if (EventManager::Instance().isIMGUIActive())
 	{
 		GUI_Function();
 	}
 
-	SDL_SetRenderDrawColor(Renderer::Instance()->getRenderer(), 232, 236, 241, 255);
-	SDL_RenderFillRect(Renderer::Instance()->getRenderer(), &StartSurface);
-	SDL_RenderFillRect(Renderer::Instance()->getRenderer(), &SlideSurface);
 	drawDisplayList();
-	SDL_SetRenderDrawColor(Renderer::Instance()->getRenderer(), 255, 255, 255, 255);
 }
 
 void PlayScene::update(float deltaTime)
@@ -42,8 +39,6 @@ void PlayScene::update(float deltaTime)
 	m_pDistanceLabel->setText("Box position X: " + std::to_string(m_pGrenade->getTransform()->position.x) + ", Y: " + std::to_string(m_pGrenade->getTransform()->position.y));
 	m_pVelocityLabel->setText("Box velocity on X axis: " + std::to_string(m_pGrenade->getRigidBody()->velocity.x / PX_PER_METER) + " m/s");
 	m_pAngleLabel->setText("Box angle: " + std::to_string(Util::Rad2Deg * m_pGrenade->rotation) + " degrees");
-	if (m_pGrenade->getGrenadeState()!=SETUP)
-		m_pScaleLabel->setText("Current Friction Coefficient: " + (m_pGrenade->getGrenadeState() == INCLINE ? "0" : std::to_string(-m_pPlayer->groundFriction)));
 }
 
 void PlayScene::clean()
@@ -55,6 +50,32 @@ void PlayScene::handleEvents(float deltaTime)
 {
 	EventManager::Instance().update();
 
+	if (EventManager::Instance().isKeyDown(SDL_SCANCODE_A))
+	{
+		m_pPlayer->moveLeft();
+	}
+	else if (EventManager::Instance().isKeyDown(SDL_SCANCODE_D))
+	{
+		m_pPlayer->moveRight();
+	}
+	else
+	{
+		m_pPlayer->stopXMovement();
+	}
+
+	if (EventManager::Instance().isKeyDown(SDL_SCANCODE_W))
+	{
+		m_pPlayer->moveUp();
+	}
+	else if (EventManager::Instance().isKeyDown(SDL_SCANCODE_S))
+	{
+		m_pPlayer->moveDown();
+	}
+	else
+	{
+		m_pPlayer->stopYMovement();
+	}
+
 	if (EventManager::Instance().isKeyDown(SDL_SCANCODE_ESCAPE))
 	{
 		TheGame::Instance()->quit();
@@ -63,16 +84,17 @@ void PlayScene::handleEvents(float deltaTime)
 
 void PlayScene::start()
 {
+	m_buildGrid();
+
 	//// Player Sprite
 	m_pPlayer = new Player();
 	m_pPlayer->setParent(this);
 	addChild(m_pPlayer);
 	
 	// Box Sprite
-	m_pGrenade = new Grenade();
+	m_pGrenade = new Bullet();
 	m_pGrenade->setParent(this);
 	addChild(m_pGrenade);
-	m_pGrenade->slope = m_pPlayer;
 	resetSim();
 
 	// Labels
@@ -94,26 +116,15 @@ void PlayScene::start()
 	m_pScaleLabel->setParent(this);
 	addChild(m_pScaleLabel);
 
-	//graphics
-	BuildStartSurface();
-	BuildSlideSurface();
 }
 
 void PlayScene::resetSim()
 {
-	m_pPlayer->spawn(glm::vec2(Config::SCREEN_WIDTH / 4, (Config::SCREEN_HEIGHT / 4) * 3), 4, 3);
-	m_pPlayer->BuildRamp();
-	m_pPlayer->groundFriction = -0.42f;
-	m_pPlayer->rampFriction = -1.00f;
-	m_pGrenade->m_mass = 12.8f;
 	reset();
 }
 
 void PlayScene::reset()
 {
-	m_pGrenade->spawn(m_pPlayer->Rise);
-	BuildStartSurface();
-	BuildSlideSurface();
 }
 
 void PlayScene::launch()
@@ -158,42 +169,6 @@ void PlayScene::GUI_Function()
 	ImGui::Separator();
 
 	
-	if (ImGui::SliderFloat("Ramp Width", &m_pPlayer->rampWidth, 1.0f, 10.0f))
-	{
-		m_pPlayer->BuildRamp();
-		reset();
-	}
-
-	if (ImGui::SliderFloat("Ramp Height", &m_pPlayer->rampHeight, 1.0f, 10.0f))
-	{
-		m_pPlayer->BuildRamp();
-		reset();
-	}
-
-	if (ImGui::SliderFloat("Ramp Position (X)", &m_pPlayer->Origin.x, 0.0f, Config::SCREEN_WIDTH))
-	{
-		m_pPlayer->spawn(m_pPlayer->Origin, m_pPlayer->rampWidth, m_pPlayer->rampHeight);
-		reset();
-	}
-
-	if (ImGui::SliderFloat("Ramp Position (Y)", &m_pPlayer->Origin.y, 0.0f, Config::SCREEN_HEIGHT))
-	{
-		m_pPlayer->spawn(m_pPlayer->Origin, m_pPlayer->rampWidth, m_pPlayer->rampHeight);
-		reset();
-	}
-	if (ImGui::SliderFloat("Box Position (X)", &m_pGrenade->Ground.x, 0.0f, Config::SCREEN_WIDTH))
-	{
-		m_pGrenade->Ground.y = m_pPlayer->GetCurrentHeight(m_pGrenade->Ground.x);
-		m_pGrenade->CalculatePosition();
-	}
-	if (ImGui::SliderFloat("Ramp Friction", &m_pPlayer->rampFriction, -1.00f, -0.01f))
-	{
-		
-	}
-	if (ImGui::SliderFloat("Ground Friction", &m_pPlayer->groundFriction, -1.0f, -0.01))
-	{
-
-	}
 	ImGui::End();
 
 	// Don't Remove this
@@ -218,20 +193,4 @@ void PlayScene::m_buildGrid()
 			m_pGrid.push_back(tile);
 		}
 	}
-}
-
-void PlayScene::BuildStartSurface()
-{
-	StartSurface.x = 0.0f;
-	StartSurface.y = m_pPlayer->Rise.y;
-	StartSurface.w = m_pPlayer->Origin.x;
-	StartSurface.h = Config::SCREEN_HEIGHT - m_pPlayer->Rise.y;
-}
-
-void PlayScene::BuildSlideSurface()
-{
-	SlideSurface.x = m_pPlayer->Run.x;
-	SlideSurface.y = m_pPlayer->Run.y;
-	SlideSurface.w = Config::SCREEN_WIDTH - m_pPlayer->Run.x;
-	SlideSurface.h = Config::SCREEN_HEIGHT - m_pPlayer->Run.y;
 }

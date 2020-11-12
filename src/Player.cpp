@@ -5,25 +5,17 @@
 
 Player::Player()
 {
-	TextureManager::Instance()->load("../Assets/textures/Wookie.png", "wookie");
-	
-	auto size = TextureManager::Instance()->getTextureSize("wookie");
-	setWidth(100);
-	setHeight(100);
+	TextureManager::Instance()->load("../Assets/textures/Circle.png", "circle");
+
+	auto size = TextureManager::Instance()->getTextureSize("circle");
+	setWidth(size.x);
+	setHeight(size.y);
 
 	getTransform()->position = glm::vec2(400.0f, 300.0f);
 	getRigidBody()->velocity = glm::vec2(0.0f, 0.0f);
 	getRigidBody()->acceleration = glm::vec2(0.0f, 0.0f);
 	getRigidBody()->isColliding = false;
 	setType(PLAYER);
-	SetSprint(false);
-
-	//Ramp Set up
-	rampWidth = 4.0f;
-	rampHeight = 3.0f;
-
-	groundFriction = -0.42f;
-	rampFriction = -1.00f;
 }
 
 Player::~Player()
@@ -35,26 +27,36 @@ void Player::draw()
 	const auto x = getTransform()->position.x;
 	const auto y = getTransform()->position.y;
 
-	//TextureManager::Instance()->draw("wookie", x, y, getWidth(), getHeight(), 0, 255, true, SDL_FLIP_HORIZONTAL);
-	glm::vec4 colour = {0.0f, 0.0f, 1.0f, 1.0f};
-
-	for (int i = 0; i < 50; i += 2) {
-		Util::DrawLine({ Rise.x, Rise.y + i }, { Run.x, Run.y + i }, colour);
-	}
+	TextureManager::Instance()->draw("circle", x, y,getWidth(), getHeight(), 0, 255, true);
 }
 
-void Player::update(float deltaTime)
+void Player::update(float deltatime)
 {
-	/*glm::vec2 pos = getTransform()->position;
+	//const float deltaTime = 1.0f / 60.f;
+	if (Util::magnitude(m_direction) > 0)
+	{
+		m_direction *= 1.0f / Util::magnitude(m_direction);
 
-	getRigidBody()->velocity += Util::limitMagnitude(getRigidBody()->acceleration, currentSpeed());
+		getRigidBody()->acceleration = Util::normalize(m_direction) * ACCELERATION;
 
-	pos.x += getRigidBody()->velocity.x * deltaTime;
-	pos.y += getRigidBody()->velocity.y * deltaTime;
+	}
+	else if (Util::magnitude(getRigidBody()->velocity) > 0)
+	{
+		getRigidBody()->acceleration = Util::normalize(getRigidBody()->velocity) * -ACCELERATION;
+
+		if (Util::magnitude(getRigidBody()->velocity) < ACCELERATION)
+		{
+			getRigidBody()->velocity = glm::vec2(0.0f, 0.0f);
+			getRigidBody()->acceleration = glm::vec2(0.0f, 0.0f);
+		}
+	}
+
+	getRigidBody()->velocity += getRigidBody()->acceleration;
+	glm::vec2 pos = getTransform()->position;
+	pos.x += getRigidBody()->velocity.x * deltatime;
+	pos.y += getRigidBody()->velocity.y * deltatime;
 
 	getTransform()->position = pos;
-	slow();
-	SetSprint(false);*/
 }
 
 void Player::clean()
@@ -62,73 +64,53 @@ void Player::clean()
 
 }
 
-void Player::spawn(glm::vec2 position, int width, int height) //accepts height in meters
+void Player::moveLeft()
 {
-	Origin = position;
-	rampWidth = width;
-	rampHeight = height;
-	BuildRamp();
+	m_direction.x = -1;
 }
 
-float Player::currentAcceleration()
+void Player::moveRight()
 {
-	return m_sprintFlag ? RUN_ACCELERATION : WALK_ACCELERATION;
+	m_direction.x = 1;
 }
 
-float Player::currentSpeed()
+void Player::moveUp()
 {
-	return m_sprintFlag ? RUN_SPEED : WALK_SPEED;
+	m_direction.y = -1;
 }
 
-void Player::moveLeft() {
-	getRigidBody()->acceleration.x -= currentAcceleration();
-}
-
-void Player::moveRight() {
-	getRigidBody()->acceleration.x += currentAcceleration();
-}
-
-void Player::moveUp() {
-	getRigidBody()->acceleration.y -= currentAcceleration();
-}
-
-void Player::moveDown() {
-	getRigidBody()->acceleration.y += currentAcceleration();
-}
-
-void Player::slow()
+void Player::moveDown()
 {
-	getRigidBody()->acceleration *= 0.5f;
-	getRigidBody()->velocity *= 0.8f;
+	m_direction.y = 1;
 }
 
-void Player::stop()
+void Player::stopXMovement()
 {
-	getRigidBody()->acceleration = { 0.0f, 0.0f };
-	getRigidBody()->velocity = { 0.0f, 0.0f };
+	m_direction.x = 0;
 }
 
-float Player::checkDistance(GameObject* pGameObject) {
-	return Util::distance(getTransform()->position, pGameObject->getTransform()->position);
-}
-
-void Player::BuildRamp()
+void Player::stopYMovement()
 {
-	Rise = { Origin.x, Origin.y - rampHeight * PX_PER_METER };
-	Run = { Origin.x + rampWidth * PX_PER_METER, Origin.y };
+	m_direction.y = 0;
 }
 
-float Player::GetCurrentHeight(float x)
+void Player::checkCollision(GameObject * pGameObject)
 {
-	if (x < Origin.x) return Rise.y;
-	if (x > Run.x) return Origin.y;
-	return Rise.y + (rampHeight / rampWidth) * (x - Origin.x);
+	glm::vec2 ob1 = getTransform()->position;
+	glm::vec2 ob2 = pGameObject->getTransform()->position;
+	int halfHeights = (getHeight() + pGameObject->getHeight()) * 0.5f;
+
+	if (Util::squaredDistance(ob1, ob2) < (halfHeights * halfHeights))
+		getRigidBody()->isColliding = true;
+	else
+		getRigidBody()->isColliding = false;
 }
 
-float Player::GetCurrentNormal(float x)
+float Player::checkDistance(GameObject * pGameObject)
 {
-	if (x < Origin.x || x > Run.x) return 0.0f;
-	return atan(rampHeight / rampWidth);
+	float tempDistance;
+
+	tempDistance = Util::distance(getTransform()->position, pGameObject->getTransform()->position);
+
+	return tempDistance;
 }
-
-

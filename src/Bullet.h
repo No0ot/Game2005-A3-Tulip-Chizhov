@@ -13,13 +13,13 @@ enum GrenadeState {
 	STOP
 };
 
-class Grenade : public PhysicsObject
+class Bullet : public PhysicsObject
 {
 private:
 	GrenadeState m_state;
 public:
-	Grenade();
-	~Grenade() = default;
+	Bullet();
+	~Bullet() = default;
 
 	void draw();
 	void update(float deltaTime);
