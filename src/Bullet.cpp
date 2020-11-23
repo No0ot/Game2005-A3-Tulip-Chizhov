@@ -13,7 +13,7 @@ Bullet::Bullet()
 	auto size = TextureManager::Instance()->getTextureSize("bullet");
 	setWidth(size.x);
 	setHeight(size.y);
-	m_mass = 1;
+	m_mass = 1.0f;
 	m_pActive = false;
 
 	getTransform()->position = glm::vec2(500.0f, 200.0f);
@@ -40,20 +40,20 @@ void Bullet::update(float deltaTime)
 {
 	if (m_pActive)
 	{
-		getRigidBody()->acceleration = glm::vec2(0.0f, -5.0f);
-		//applyGravity(deltaTime);
+		//getRigidBody()->acceleration = glm::vec2(0.0f, -5.0f);
+		applyGravity(deltaTime);
 		getRigidBody()->velocity -= getRigidBody()->acceleration;
 		glm::vec2 pos = getTransform()->position;
 		pos.x += getRigidBody()->velocity.x * deltaTime;
 		pos.y += getRigidBody()->velocity.y * deltaTime;
 
 		getTransform()->position = pos;
-		if (getTransform()->position.y > Config::SCREEN_HEIGHT)
+		/*if (getTransform()->position.y > Config::SCREEN_HEIGHT)
 		{
 			
 			BulletManager::Instance()->returnBullet(this);
 			std::cout << "dead bullet" << std::endl;
-		}
+		}*/
 	}
 	else
 	{
@@ -70,6 +70,7 @@ void Bullet::spawn(glm::vec2 position)
 	reset();
 	setActive(true);
 	getTransform()->position = position;
+	std::cout << "Bullet Made" << std::endl;
 }
 
 void Bullet::launch()

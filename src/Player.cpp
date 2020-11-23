@@ -11,7 +11,7 @@ Player::Player()
 	setWidth(size.x);
 	setHeight(size.y);
 
-	getTransform()->position = glm::vec2(400.0f, 300.0f);
+	getTransform()->position = glm::vec2(Config::SCREEN_WIDTH /2, Config::SCREEN_HEIGHT /2);
 	getRigidBody()->velocity = glm::vec2(0.0f, 0.0f);
 	getRigidBody()->acceleration = glm::vec2(0.0f, 0.0f);
 	getRigidBody()->isColliding = false;
@@ -50,6 +50,7 @@ void Player::update(float deltatime)
 			getRigidBody()->acceleration = glm::vec2(0.0f, 0.0f);
 		}
 	}
+	checkBounds();
 
 	getRigidBody()->velocity += getRigidBody()->acceleration;
 	glm::vec2 pos = getTransform()->position;
@@ -57,6 +58,7 @@ void Player::update(float deltatime)
 	pos.y += getRigidBody()->velocity.y * deltatime;
 
 	getTransform()->position = pos;
+
 }
 
 void Player::clean()
@@ -104,6 +106,22 @@ void Player::checkCollision(GameObject * pGameObject)
 		getRigidBody()->isColliding = true;
 	else
 		getRigidBody()->isColliding = false;
+}
+
+void Player::checkBounds()
+{
+	glm::vec2 ob = getTransform()->position;
+
+	if (ob.x > Config::SCREEN_WIDTH || ob.x < 0 )
+	{
+
+		getRigidBody()->velocity *= glm::vec2(-0.8, 0.8);
+	}
+	if (ob.y > Config::SCREEN_HEIGHT || ob.y < 0)
+	{
+
+		getRigidBody()->velocity *= glm::vec2(0.8, -0.8);
+	}
 }
 
 float Player::checkDistance(GameObject * pGameObject)

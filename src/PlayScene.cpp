@@ -44,21 +44,27 @@ void PlayScene::update(float deltaTime)
 	if (m_pBulletTimer == m_pBulletTimerMax)
 	{
 		//std::cout << "tick" << std::endl;
-		if (BulletManager::Instance()->numActive < BulletManager::Instance()->m_pBulletPool.size())
+		if (m_pbulletSpawn)
 		{
-			Bullet* bullet = BulletManager::Instance()->fetchBullet();
-			if (bullet != nullptr)
+			if (BulletManager::Instance()->numActive < m_pMaxActive)
 			{
-				bullet->spawn(glm::vec2(rand() % 1600 + 20, -50));
-				BulletManager::Instance()->numActive++;
+				Bullet* bullet = BulletManager::Instance()->fetchBullet();
+				if (bullet != nullptr)
+				{
+					bullet->spawn(glm::vec2(rand() % 1600 + 20, -50));
+					BulletManager::Instance()->numActive++;
+				}
 			}
 		}
 			m_pBulletTimer = 0;
 	}
 
+	m_pCollisionsLabel->setText("Number of Collisions: " + std::to_string(BulletManager::Instance()->numCollisions));
+	m_pMissedLabel->setText("Number Missed : " + std::to_string(BulletManager::Instance()->numMissed));
+
 	CheckCollisions();
 	BulletManager::Instance()->updatebullets(deltaTime);
-	std::cout << BulletManager::Instance()->m_pBulletPool.size() << std::endl;
+	std::cout << BulletManager::Instance()->numActive << std::endl;
 }
 
 void PlayScene::clean()
@@ -104,9 +110,8 @@ void PlayScene::handleEvents(float deltaTime)
 
 void PlayScene::start()
 {
-	m_pBulletTimerMax = 20;
-	BulletManager::Instance()->populate(20);
-
+	BulletManager::Instance()->populate(m_pMaxBullets);
+	m_pBulletTimer = 0;
 	m_buildGrid();
 
 	//// Player Sprite
@@ -117,27 +122,33 @@ void PlayScene::start()
 	// Labels
 	const SDL_Color blue = { 0, 0, 255, 255 };
 
-	m_pDistanceLabel = new Label("Distance", "Consolas", 30, blue, glm::vec2(700, 40.0f));
-	m_pDistanceLabel->setParent(this);
-	addChild(m_pDistanceLabel);
-
-	m_pVelocityLabel = new Label("Velocity", "Consolas", 30, blue, glm::vec2(700, 70.0f));
-	m_pVelocityLabel->setParent(this);
-	addChild(m_pVelocityLabel);
-
-	m_pAngleLabel = new Label("Velocity", "Consolas", 30, blue, glm::vec2(700, 100.0f));
-	m_pAngleLabel->setParent(this);
-	addChild(m_pAngleLabel);
-
-	m_pScaleLabel = new Label("Scale = 100 px/m", "Consolas", 30, blue, glm::vec2(700, 130.0f));
+	m_pScaleLabel = new Label("Scale = 100 px/m", "Consolas", 30, blue, glm::vec2(700, 40.0f));
 	m_pScaleLabel->setParent(this);
 	addChild(m_pScaleLabel);
+
+	m_pCollisionsLabel = new Label("Number of Collisions", "Consolas", 30, blue, glm::vec2(700, 70.0f));
+	m_pCollisionsLabel->setParent(this);
+	addChild(m_pCollisionsLabel);
+
+	m_pMissedLabel = new Label("Number Missed", "Consolas", 30, blue, glm::vec2(700, 100.0f));
+	m_pMissedLabel->setParent(this);
+	addChild(m_pMissedLabel);
 
 }
 
 void PlayScene::resetSim()
 {
-	reset();
+	m_pbulletSpawn = false;
+	 m_pMaxBullets = 100;
+	 m_pMaxActive = 10;
+	 m_pBulletTimerMax = 10;
+	 m_pBulletMass = 1.0f;
+	 m_pPlayer->getTransform()->position = glm::vec2(Config::SCREEN_WIDTH / 2, Config::SCREEN_HEIGHT / 2);
+	 m_pPlayer->getRigidBody()->velocity = glm::vec2(0.0f, 0.0f);
+	 m_pPlayer->getRigidBody()->acceleration = glm::vec2(0.0f, 0.0f);
+	 BulletManager::Instance()->numCollisions = 0;
+	 BulletManager::Instance()->numMissed = 0;
+	 BulletManager::Instance()->cleanPool();
 }
 
 void PlayScene::reset()
@@ -168,17 +179,16 @@ void PlayScene::GUI_Function()
 
 	ImGui::Separator();
 
-	if (ImGui::Button("Release"))
+	if (ImGui::Button("Start"))
 	{
-		if (m_pGrenade->getGrenadeState() == SETUP)
-			launch();
+		m_pbulletSpawn = true;
 	}
 
 	ImGui::SameLine();
 
-	if (ImGui::Button("Reset Box"))
+	if (ImGui::Button("Stop"))
 	{
-		reset();
+		m_pbulletSpawn = false;
 	}
 
 	ImGui::SameLine();
@@ -188,9 +198,41 @@ void PlayScene::GUI_Function()
 		resetSim();
 	}
 
+
+	ImGui::Separator();
+	if (ImGui::SliderInt("Max Active Bullets", &m_pMaxActive, 1, 100))
+	{
+		clean();
+		start();
+	}
+	
+	if (ImGui::SliderInt("Bullet Timer", &m_pBulletTimerMax, 1, 60))
+	{
+		clean();
+		start();
+	}
+
+	if (ImGui::SliderFloat("Bullet Mass", &m_pBulletMass, 0.5f, 5.0f))
+	{
+		clean();
+		start();
+		BulletManager::Instance()->setMass(m_pBulletMass);
+	}
+
 	ImGui::Separator();
 
-	
+	if (ImGui::Button("Start Scene"))
+	{
+		TheGame::Instance()->changeSceneState(START_SCENE);
+	}
+
+	ImGui::SameLine();
+
+	if (ImGui::Button("Next Scene"))
+	{
+		TheGame::Instance()->changeSceneState(END_SCENE);
+	}
+
 	ImGui::End();
 
 	// Don't Remove this

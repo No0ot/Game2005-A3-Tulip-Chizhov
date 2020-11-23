@@ -7,7 +7,7 @@ void BulletManager::populate(int queueMax)
 	for (int i = 0; i < queueMax; i++)
 	{	
 		m_pBulletPool.emplace_back(new Bullet());
-		std::cout << "Bullet Made" << std::endl;
+		
 	}
 }
 
@@ -35,6 +35,23 @@ void BulletManager::returnBullet(Bullet* bullet)
 	//m_pBulletPool.push_back(bullet);
 }
 
+void BulletManager::cleanPool()
+{
+	for (auto bullet : m_pBulletPool)
+	{
+		bullet->setActive(false);
+	}
+	numActive = 0;
+}
+
+void BulletManager::setMass(float mass)
+{
+	for (auto bullet : m_pBulletPool)
+	{
+		bullet->m_mass = mass;
+	}
+}
+
 void BulletManager::updatebullets(float deltaTime)
 {
 	for (int i = 0; i < m_pBulletPool.size(); i++)
@@ -58,11 +75,21 @@ void BulletManager::CheckBulletCollisions(GameObject* collidingObject)
 {
 	for (int i = 0; i < m_pBulletPool.size(); i++)
 	{
-		if(m_pBulletPool[i]->getActive())
+		if (m_pBulletPool[i]->getActive())
+		{
 			if (CollisionManager::squaredRadiusCheck(m_pBulletPool[i], collidingObject))
 			{
 				returnBullet(m_pBulletPool[i]);
+				numCollisions++;
 			}
+			if (m_pBulletPool[i]->getTransform()->position.y > Config::SCREEN_HEIGHT)
+			{
+				numMissed++;
+				returnBullet(m_pBulletPool[i]);
+				std::cout << "dead bullet" << std::endl;
+			}
+		}
+
 	}
 }
 

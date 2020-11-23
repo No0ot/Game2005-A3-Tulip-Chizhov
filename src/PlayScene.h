@@ -57,16 +57,20 @@ private:
 	Enemy* m_pEnemy;
 	Bullet* m_pGrenade;
 
-	Label* m_pDistanceLabel;
-	Label* m_pVelocityLabel;
-	Label* m_pAngleLabel;
+	Label* m_pCollisionsLabel;
+	Label* m_pMissedLabel;
 	Label* m_pScaleLabel;
 
 	Button* m_pBackButton;
 	Button* m_pNextButton;
 
+	int m_pMaxBullets = 100;
+	int m_pMaxActive = 10;
 	int m_pBulletTimer;
-	int m_pBulletTimerMax;
+	int m_pBulletTimerMax = 10;
+	float m_pBulletMass = 1.0f;
+
+	bool m_pbulletSpawn = false;
 	//defaults
 	glm::vec2 rampOriginDefault = {300.0f, 600.0f};
 

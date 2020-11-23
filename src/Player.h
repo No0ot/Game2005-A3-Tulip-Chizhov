@@ -23,13 +23,14 @@ public:
 	void stopXMovement();
 	void stopYMovement();
 	void checkCollision(GameObject* pGameObject);
+	void checkBounds();
 
 	float checkDistance(GameObject* pGameObject);
 
 
 private:
 	const float SPEED = 100.0f;
-	const float ACCELERATION = 10.0f;
+	const float ACCELERATION = 15.0f;
 	glm::vec2 m_direction;
 };
 
