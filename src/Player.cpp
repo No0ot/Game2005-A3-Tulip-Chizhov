@@ -42,7 +42,7 @@ void Player::update(float deltatime)
 	}
 	else if (Util::magnitude(getRigidBody()->velocity) > 0)
 	{
-		getRigidBody()->acceleration = Util::normalize(getRigidBody()->velocity) * -ACCELERATION;
+		getRigidBody()->acceleration = Util::normalize(getRigidBody()->velocity) * (-ACCELERATION * 1.5f);
 
 		if (Util::magnitude(getRigidBody()->velocity) < ACCELERATION)
 		{
