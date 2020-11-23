@@ -27,6 +27,7 @@ public:
 	void resetSim();
 	void reset();
 	void launch();
+	void CheckCollisions();
 
 	//scene getters
 	Player* getPlayer() {
@@ -64,6 +65,8 @@ private:
 	Button* m_pBackButton;
 	Button* m_pNextButton;
 
+	int m_pBulletTimer;
+	int m_pBulletTimerMax;
 	//defaults
 	glm::vec2 rampOriginDefault = {300.0f, 600.0f};
 

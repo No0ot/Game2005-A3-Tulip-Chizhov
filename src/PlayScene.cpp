@@ -1,6 +1,9 @@
 #include "PlayScene.h"
 #include "Game.h"
 #include "EventManager.h"
+#include "BulletManager.h"
+#include "CollisionManager.h"
+#include "SoundManager.h"
 #include "Util.h"
 
 // required for IMGUI
@@ -13,6 +16,7 @@
 PlayScene::PlayScene()
 {
 	TextureManager::Instance()->load("../Assets/textures/background.png", "background");
+	SoundManager::Instance().load("../Assets/audio/thunder.ogg", "thunder", SOUND_SFX);
 	PlayScene::start();
 }
 
@@ -30,15 +34,31 @@ void PlayScene::draw()
 	}
 
 	drawDisplayList();
+	BulletManager::Instance()->drawBullets();
 }
 
 void PlayScene::update(float deltaTime)
 {
 	updateDisplayList(deltaTime);
+	m_pBulletTimer++;
+	if (m_pBulletTimer == m_pBulletTimerMax)
+	{
+		//std::cout << "tick" << std::endl;
+		if (BulletManager::Instance()->numActive < BulletManager::Instance()->m_pBulletPool.size())
+		{
+			Bullet* bullet = BulletManager::Instance()->fetchBullet();
+			if (bullet != nullptr)
+			{
+				bullet->spawn(glm::vec2(rand() % 1600 + 20, -50));
+				BulletManager::Instance()->numActive++;
+			}
+		}
+			m_pBulletTimer = 0;
+	}
 
-	m_pDistanceLabel->setText("Box position X: " + std::to_string(m_pGrenade->getTransform()->position.x) + ", Y: " + std::to_string(m_pGrenade->getTransform()->position.y));
-	m_pVelocityLabel->setText("Box velocity on X axis: " + std::to_string(m_pGrenade->getRigidBody()->velocity.x / PX_PER_METER) + " m/s");
-	m_pAngleLabel->setText("Box angle: " + std::to_string(Util::Rad2Deg * m_pGrenade->rotation) + " degrees");
+	CheckCollisions();
+	BulletManager::Instance()->updatebullets(deltaTime);
+	std::cout << BulletManager::Instance()->m_pBulletPool.size() << std::endl;
 }
 
 void PlayScene::clean()
@@ -84,18 +104,15 @@ void PlayScene::handleEvents(float deltaTime)
 
 void PlayScene::start()
 {
+	m_pBulletTimerMax = 20;
+	BulletManager::Instance()->populate(20);
+
 	m_buildGrid();
 
 	//// Player Sprite
 	m_pPlayer = new Player();
 	m_pPlayer->setParent(this);
 	addChild(m_pPlayer);
-	
-	// Box Sprite
-	m_pGrenade = new Bullet();
-	m_pGrenade->setParent(this);
-	addChild(m_pGrenade);
-	resetSim();
 
 	// Labels
 	const SDL_Color blue = { 0, 0, 255, 255 };
@@ -130,6 +147,11 @@ void PlayScene::reset()
 void PlayScene::launch()
 {
 	m_pGrenade->launch();
+}
+
+void PlayScene::CheckCollisions()
+{
+	BulletManager::Instance()->CheckBulletCollisions(m_pPlayer);
 }
 
 void PlayScene::GUI_Function()

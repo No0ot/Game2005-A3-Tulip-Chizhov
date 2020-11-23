@@ -17,6 +17,7 @@ class Bullet : public PhysicsObject
 {
 private:
 	GrenadeState m_state;
+	bool m_pActive;
 public:
 	Bullet();
 	~Bullet() = default;
@@ -27,7 +28,10 @@ public:
 
 	void spawn(glm::vec2 position) override;
 	void launch() override;
+	void reset();
 
+	void setActive(bool val);
+	bool getActive();
 	float checkDistance(GameObject* pGameObject);
 
 	GrenadeState getGrenadeState() { return m_state; }

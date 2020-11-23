@@ -27,9 +27,9 @@ bool CollisionManager::squaredRadiusCheck(GameObject* object1, GameObject* objec
 			object2->getRigidBody()->isColliding = true;
 
 			switch (object2->getType()) {
-			case TARGET:
+			case PLAYER:
 				std::cout << "Collision with Target!" << std::endl;
-				SoundManager::Instance().playSound("yay", 0);
+				SoundManager::Instance().playSound("thunder", 0);
 
 				
 				break;
@@ -281,7 +281,7 @@ bool CollisionManager::circleAABBCheck(GameObject* object1, GameObject* object2)
 				std::cout << "Collision with Planet!" << std::endl;
 				SoundManager::Instance().playSound("yay", 0);
 				break;
-			case SHIP:
+			case PLAYER:
 				{
 					SoundManager::Instance().playSound("thunder", 0);
 					auto velocityX = object1->getRigidBody()->velocity.x;
