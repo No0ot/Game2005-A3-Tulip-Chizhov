@@ -41,17 +41,22 @@ void StartScene::handleEvents(float deltaTime)
 	{
 		TheGame::Instance()->changeSceneState(PLAY_SCENE);
 	}
+
+	if (EventManager::Instance().isKeyDown(SDL_SCANCODE_2))
+	{
+		TheGame::Instance()->changeSceneState(END_SCENE);
+	}
 }
 
 void StartScene::start()
 {
 	const SDL_Color blue = { 0, 0, 255, 255 };
 	const SDL_Color red = { 255, 0, 0, 255 };
-	m_pStartLabel = new Label("GAME2005 Assignment 2", "Consolas", 80, blue, glm::vec2(Config::SCREEN_WIDTH / 2, 40.0f));
+	m_pStartLabel = new Label("GAME2005 Assignment 3", "Consolas", 80, blue, glm::vec2(Config::SCREEN_WIDTH / 2, 40.0f));
 	m_pStartLabel->setParent(this);
 	addChild(m_pStartLabel);
 
-	m_pInstructionsLabel = new Label("Press \"1\" to Play", "Consolas", 40, blue, glm::vec2(Config::SCREEN_WIDTH / 2, 120.0f));
+	m_pInstructionsLabel = new Label("Press \"1\" For Part 1, Press \"2\" for Part 2", "Consolas", 40, blue, glm::vec2(Config::SCREEN_WIDTH / 2, 120.0f));
 	m_pInstructionsLabel->setParent(this);
 	addChild(m_pInstructionsLabel);
 

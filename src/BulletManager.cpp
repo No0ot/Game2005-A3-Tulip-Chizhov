@@ -77,7 +77,7 @@ void BulletManager::CheckBulletCollisions(GameObject* collidingObject)
 	{
 		if (m_pBulletPool[i]->getActive())
 		{
-			if (CollisionManager::squaredRadiusCheck(m_pBulletPool[i], collidingObject))
+			if (CollisionManager::circleAABBCheck(collidingObject, m_pBulletPool[i]))
 			{
 				returnBullet(m_pBulletPool[i]);
 				numCollisions++;

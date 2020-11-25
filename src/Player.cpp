@@ -5,11 +5,11 @@
 
 Player::Player()
 {
-	TextureManager::Instance()->load("../Assets/textures/Circle.png", "circle");
+	TextureManager::Instance()->load("../Assets/textures/ship.png", "ship");
 
-	auto size = TextureManager::Instance()->getTextureSize("circle");
-	setWidth(size.x);
-	setHeight(size.y);
+	auto size = TextureManager::Instance()->getTextureSize("ship");
+	setWidth(size.x / 6);
+	setHeight(size.y / 6);
 
 	getTransform()->position = glm::vec2(Config::SCREEN_WIDTH /2, Config::SCREEN_HEIGHT /2);
 	getRigidBody()->velocity = glm::vec2(0.0f, 0.0f);
@@ -27,7 +27,7 @@ void Player::draw()
 	const auto x = getTransform()->position.x;
 	const auto y = getTransform()->position.y;
 
-	TextureManager::Instance()->draw("circle", x, y,getWidth(), getHeight(), 0, 255, true);
+	TextureManager::Instance()->draw("ship", x, y,getWidth(), getHeight(), 0, 255, true);
 }
 
 void Player::update(float deltatime)

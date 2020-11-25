@@ -8,11 +8,11 @@
 
 Bullet::Bullet()
 {
-	TextureManager::Instance()->load("../Assets/textures/bullet.png", "bullet");
+	TextureManager::Instance()->load("../Assets/textures/missle.png", "bullet");
 
 	auto size = TextureManager::Instance()->getTextureSize("bullet");
-	setWidth(size.x);
-	setHeight(size.y);
+	setWidth(size.x /3);
+	setHeight(size.y /3);
 	m_mass = 1.0f;
 	m_pActive = false;
 
@@ -22,6 +22,7 @@ Bullet::Bullet()
 
 	slope = nullptr;
 	setGrenadeState(SETUP);
+	setType(TARGET);
 	rotation = 0.0f;
 }
 

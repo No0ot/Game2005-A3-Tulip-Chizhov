@@ -9,10 +9,10 @@
 class Config {
 public:
 	static const int SCREEN_WIDTH = 1600;
-	static const int SCREEN_HEIGHT = 900;
+	static const int SCREEN_HEIGHT = 800;
 	static const float PX_PER_METER;
 	static const float GRAVITY;
-	static const int TILE_SIZE = 50;
+	static const int TILE_SIZE = 400;
 	static const int ROW_NUM = SCREEN_HEIGHT / TILE_SIZE;
 	static const int COL_NUM = SCREEN_WIDTH / TILE_SIZE;
 	static const int TILE_COST = 1;

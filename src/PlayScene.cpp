@@ -64,7 +64,7 @@ void PlayScene::update(float deltaTime)
 
 	CheckCollisions();
 	BulletManager::Instance()->updatebullets(deltaTime);
-	std::cout << BulletManager::Instance()->numActive << std::endl;
+	std::cout << BulletManager::Instance()->m_pBulletPool.size() << std::endl;
 }
 
 void PlayScene::clean()
@@ -110,6 +110,7 @@ void PlayScene::handleEvents(float deltaTime)
 
 void PlayScene::start()
 {
+	BulletManager::Instance()->m_pBulletPool.clear();
 	BulletManager::Instance()->populate(m_pMaxBullets);
 	m_pBulletTimer = 0;
 	m_buildGrid();

@@ -3,7 +3,7 @@
 
 Tile::Tile(glm::vec2 world_position, glm::vec2 grid_position)
 {
-	TextureManager::Instance()->load("../Assets/textures/tile.png", "tile");
+	TextureManager::Instance()->load("../Assets/textures/Background.png", "tile");
 	auto size = TextureManager::Instance()->getTextureSize("tile");
 
 	setWidth(size.x);
