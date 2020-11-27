@@ -233,7 +233,7 @@ void PlayScene::GUI_Function()
 	if (ImGui::Button("Next Scene"))
 	{
 		resetSim();
-		TheGame::Instance()->changeSceneState(END_SCENE);
+		TheGame::Instance()->changeSceneState(PLAY_SCENE_2);
 	}
 
 	ImGui::End();

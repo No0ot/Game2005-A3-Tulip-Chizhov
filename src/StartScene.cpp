@@ -44,7 +44,7 @@ void StartScene::handleEvents(float deltaTime)
 
 	if (EventManager::Instance().isKeyDown(SDL_SCANCODE_2))
 	{
-		TheGame::Instance()->changeSceneState(END_SCENE);
+		TheGame::Instance()->changeSceneState(PLAY_SCENE_2);
 	}
 }
 
